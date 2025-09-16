@@ -1,0 +1,98 @@
+/* Global reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Navbar Container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 10px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  left: 0;
+  margin-bottom: 20px;
+}
+
+/* Left Side - Logo or Brand */
+.navLeft h4 {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.navLeft a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Middle Section - Navigation Links */
+.navMiddle ul {
+  list-style-type: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navMiddle li {
+  font-size: 16px;
+}
+
+.navMiddle a {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+}
+
+.navMiddle a:hover {
+  background-color: #555;
+}
+
+/* Active Link */
+.active-link {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Right Side - Demo Link */
+.navRight {
+  display: flex;
+  align-items: center;
+}
+
+.tryDemo {
+  text-decoration: none;
+  background-color: #ff6f61;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.demoText {
+  color: white;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navMiddle ul {
+    display: none; /* Hide the menu on small screens */
+  }
+  .navbar {
+    justify-content: space-between;
+  }
+
+  .navRight .tryDemo {
+    font-size: 14px;
+  }
+}
