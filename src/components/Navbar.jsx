@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import './navbar.css';
+import '../components/navBar.css';
 import Apparentlylogo from '../assets/apparently-digital-logo.png';
 function Navbar() {
   return (
