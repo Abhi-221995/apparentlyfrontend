@@ -312,7 +312,7 @@ function HourlyReport() {
   );
   const totalEstimatedClicks = aggregatedRows.reduce(
     (acc, r) =>
-      acc + (Number.isFinite(r.ESTIMATED_CLICKS) ? r.ESTIMATED_CLICKS : 0),
+      acc + (Number.isFinite(r.IMPRESSIONS) ? r.IMPRESSIONS : 0),
     0
   );
 
@@ -321,6 +321,7 @@ function HourlyReport() {
 
   return (
     <div className="mainContainer">
+      
       <div className="reports-page">
         <h1 className="reports-title">EveryKnown & Travado Dashboard 📈</h1>
 
@@ -383,7 +384,7 @@ function HourlyReport() {
           <div className="reports-metadata-group">
             <span className="reports-meta">Total Rows: {fmtNumber(rows.length)}</span>
             <span className="reports-meta">Filtered Rows: {fmtNumber(filteredRows.length)}</span>
-            <span className="reports-meta">Aggregated Sites: {fmtNumber(aggregatedRows.length)}</span>
+            <span className="reports-meta">Aggregated Ads: {fmtNumber(aggregatedRows.length)}</span>
           </div>
         </div>
 
@@ -406,30 +407,11 @@ function HourlyReport() {
                 <p className="kpi-value">{fmtNumber(totalClicks)}</p>
               </div>
               <div className="total-summary card-kpi">
-                <h3>Total Est. Clicks</h3>
+                <h3>Total Impressions</h3>
                 <p className="kpi-value">{fmtNumber(totalEstimatedClicks)}</p>
               </div>
             </div>
 
-            {/* Agency Breakdown */}
-            {/* {Object.keys(agencyTotals).length > 1 && (
-              <div className="agency-breakdown">
-                <h2>Agency Performance Breakdown 🏢</h2>
-                <div className="agency-cards">
-                  {Object.entries(agencyTotals).map(([agency, totals]) => (
-                    <div key={agency} className="agency-card">
-                      <h3>{agency}</h3>
-                      <div className="agency-stats">
-                        <p><strong>Earnings:</strong> {fmtMoney(totals.earnings)}</p>
-                        <p><strong>Clicks:</strong> {fmtNumber(totals.clicks)}</p>
-                        <p><strong>Sites:</strong> {fmtNumber(totals.sites)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-             */}
             <div className="dashboard-charts">
               <div className="chart-container-graph">
                 <h2>Top 8 Ads by Estimated Earnings 💰</h2>
@@ -480,6 +462,7 @@ function HourlyReport() {
           </>
         )}
       </div>
+    
     </div>
   );
 }

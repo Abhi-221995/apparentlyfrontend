@@ -44,10 +44,6 @@ body {
   gap: 20px;
 }
 
-.navMiddle li {
-  font-size: 16px;
-}
-
 .navMiddle a {
   color: #fff;
   text-decoration: none;
@@ -83,16 +79,56 @@ body {
   font-weight: bold;
 }
 
+/* Hamburger Menu Icon */
+.nav-toggle {
+  display: none; /* Hidden by default on desktop */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.nav-toggle .bar {
+  width: 100%;
+  height: 3px;
+  background-color: #fff;
+  border-radius: 5px;
+  transition: all 0.3s linear;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-  .navMiddle ul {
-    display: none; /* Hide the menu on small screens */
-  }
-  .navbar {
-    justify-content: space-between;
+  .navMiddle {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 70px; /* Adjust based on navbar height */
+    left: 0;
+    background-color: #333;
+    text-align: center;
+    padding: 10px 0;
   }
 
-  .navRight .tryDemo {
-    font-size: 14px;
+  .navMiddle.open {
+    display: flex;
+  }
+
+  .navMiddle ul {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navMiddle li {
+    margin: 10px 0;
+  }
+
+  .nav-toggle {
+    display: flex; /* Show hamburger menu on mobile */
+  }
+
+  .navRight {
+    display: none; /* You can show or hide this based on design preference */
   }
 }

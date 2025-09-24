@@ -406,6 +406,7 @@
     display: block; /* Make table block-level for overflow */
     overflow-x: auto; /* Enable horizontal scrolling for the table */
     white-space: nowrap; /* Prevent content from wrapping */
+    text-align: center;
   }
 
   .hourly-table thead,
@@ -417,6 +418,7 @@
   .hourly-table thead th,
   .hourly-table tbody td {
     padding: 8px 6px;
+    align-items: center;
   }
 
   /* Aggregated Card adjustments */
@@ -438,6 +440,7 @@
 
 @media (max-width: 480px) {
   .hourly-page {
-    padding: 10px;
+    padding: 50px 10px 10px 10px;
+    
   }
 }

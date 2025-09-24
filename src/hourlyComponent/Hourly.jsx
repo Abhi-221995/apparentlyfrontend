@@ -2,66 +2,41 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "./hourly.css";
 
-
 function Hourly() {
-  const accessToken = "ebb5cd6d-b40d-45ea-9aa3-512c523b9b3c";
-
-  const [selectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
   const [lastFetchTime, setLastFetchTime] = useState(null);
-  const [lastSaveTime, setLastSaveTime] = useState(null);
   const [searchTkid, setSearchTkid] = useState("");
   const [filteredData, setFilteredData] = useState(null);
   const [aggregatedData, setAggregatedData] = useState(null);
 
-  const fetchData = async (dateToFetch) => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const date = new Date();
-      const dateStr = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Los_Angeles",
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      }).format(date);
-
       const response = await axios.get(
-        `/api/proxy?accessToken=${accessToken}&startDate=${encodeURIComponent(
-          dateStr
-        )}`
+        "https://apparentlydigitalbackend.onrender.com/revenue"
       );
-      setData(response.data);
+
+      const formattedData = response.data.map((row) => {
+        const newRow = {};
+        for (const key in row) {
+          if (Object.prototype.hasOwnProperty.call(row, key)) {
+            newRow[key.toLowerCase()] = row[key];
+          }
+        }
+        return newRow;
+      });
+
+      setData(formattedData);
       setLastFetchTime(new Date());
-      setFilteredData(response.data);
-      aggregateData(response.data); // Call the aggregation function
+      setFilteredData(formattedData);
+      aggregateData(formattedData);
     } catch (err) {
       setError(err?.message || "Error fetching data");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSave = async (dataToSave, dateToSave) => {
-    if (!dataToSave) return;
-    setIsSaving(true);
-    setSaveMessage("");
-    try {
-      const payload = Array.isArray(dataToSave) ? dataToSave : [dataToSave];
-      await axios.post("http://localhost:3000/revenues", {
-        date: dateToSave,
-        rows: payload,
-      });
-      setSaveMessage("Saved successfully");
-      setLastSaveTime(new Date());
-    } catch (e) {
-      setSaveMessage(e?.response?.data?.message || "Failed to save");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -71,16 +46,12 @@ function Hourly() {
       setFilteredData(data);
     } else {
       const filtered = data.filter((row) =>
-        String(row.TKID).includes(searchTkid)
+        String(row.tkid).includes(searchTkid)
       );
       setFilteredData(filtered);
     }
   };
 
-  /**
-   * Aggregates data by TKID and calculates RPC.
-   * @param {Array} rawData The raw data to be aggregated.
-   */
   const aggregateData = (rawData) => {
     if (!rawData || !Array.isArray(rawData)) {
       setAggregatedData([]);
@@ -88,26 +59,26 @@ function Hourly() {
     }
 
     const aggregated = rawData.reduce((acc, current) => {
-      const { TKID, ESTIMATED_EARNINGS, CLICKS } = current;
-      if (!acc[TKID]) {
-        acc[TKID] = {
-          TKID,
-          ESTIMATED_EARNINGS: 0,
-          CLICKS: 0,
-          RPC: 0,
+      const { tkid, estimated_earnings, clicks } = current;
+      if (!acc[tkid]) {
+        acc[tkid] = {
+          tkid,
+          estimated_earnings: 0,
+          clicks: 0,
+          rpc: 0,
         };
       }
-      acc[TKID].ESTIMATED_EARNINGS += parseFloat(ESTIMATED_EARNINGS || 0);
-      acc[TKID].CLICKS += parseInt(CLICKS || 0, 10);
+      acc[tkid].estimated_earnings += parseFloat(estimated_earnings || 0);
+      acc[tkid].clicks += parseInt(clicks || 0, 10);
       return acc;
     }, {});
 
     const finalAggregated = Object.values(aggregated).map((row) => {
-      const rpc = row.CLICKS > 0 ? row.ESTIMATED_EARNINGS / row.CLICKS : 0;
+      const rpc = row.clicks > 0 ? row.estimated_earnings / row.clicks : 0;
       return {
         ...row,
-        RPC: `$${rpc.toFixed(2)}`,
-        ESTIMATED_EARNINGS: `$${row.ESTIMATED_EARNINGS.toFixed(2)}`,
+        rpc: `$${rpc.toFixed(2)}`,
+        estimated_earnings: `$${row.estimated_earnings.toFixed(2)}`,
       };
     });
 
@@ -115,10 +86,10 @@ function Hourly() {
   };
 
   useEffect(() => {
-    fetchData(selectedDate);
-    const fetchInterval = setInterval(() => fetchData(selectedDate), 3600000);
+    fetchData();
+    const fetchInterval = setInterval(fetchData, 3600000);
     return () => clearInterval(fetchInterval);
-  }, [selectedDate]);
+  }, []);
 
   useEffect(() => {
     handleSearch();
@@ -128,16 +99,30 @@ function Hourly() {
     if (!dataToRender || dataToRender.length === 0)
       return <div style={{ padding: "16px" }}>No data</div>;
 
-    const columns = isAggregated
-      ? ["TKID", "ESTIMATED_EARNINGS", "CLICKS", "RPC"]
-      : Array.from(new Set(dataToRender.flatMap((row) => Object.keys(row))));
+    let columns;
+    if (isAggregated) {
+      columns = ["tkid", "estimated_earnings", "clicks", "rpc"];
+    } else {
+      columns = [
+        "tkid",
+        "agid",
+        "estimated_earnings",
+        "page_views",
+        "impressions",
+        "clicks",
+        "estimated_clicks",
+        "platform_type_code",
+        "date_uploaded",
+        "date_uploaded_pst",
+      ];
+    }
 
     return (
       <table className="hourly-table">
         <thead>
           <tr>
             {columns.map((col) => (
-              <th key={col}>{col}</th>
+              <th key={col}>{col.replace(/_/g, " ").toUpperCase()}</th>
             ))}
           </tr>
         </thead>
@@ -160,7 +145,6 @@ function Hourly() {
 
   return (
     <div className="hourly-page">
-      {/* First Card (Original Code) */}
       <div className="hourly-card">
         <div className="hourly-card-header">
           <h2 className="hourly-title">Realtime Channel Analytics</h2>
@@ -175,76 +159,32 @@ function Hourly() {
             <button onClick={handleSearch} className="hourly-save-button">
               Search
             </button>
-            <span className="hourly-meta">
-              Date:{" "}
-              {new Date().toLocaleString("en-US", {
-                timeZone: "America/Los_Angeles",
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-              })}
-            </span>
             {Array.isArray(filteredData) && (
               <span className="hourly-meta">Rows: {filteredData.length}</span>
             )}
             {lastFetchTime && (
               <span className="hourly-meta">
-                Last Fetch:{" "}
+                Last Updated:{" "}
                 {lastFetchTime.toLocaleString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
                   second: "2-digit",
                   hour12: true,
                 })}
               </span>
-            )}
-            {lastSaveTime && (
-              <span className="hourly-meta">
-                Last Save:{" "}
-                {lastSaveTime.toLocaleString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: true,
-                })}
-              </span>
-            )}
-            {data && (
-              <button
-                onClick={() =>
-                  handleSave(
-                    data,
-                    new Date(selectedDate + "T00:00:00").toLocaleString("en-US", {
-                      timeZone: "America/Los_Angeles",
-                      month: "2-digit",
-                      day: "2-digit",
-                      year: "numeric",
-                    })
-                  )
-                }
-                disabled={isSaving}
-                className="hourly-save-button"
-              >
-                {isSaving ? "Saving…" : "Save to API"}
-              </button>
-            )}
-            {saveMessage && (
-              <span className="hourly-meta">{saveMessage}</span>
             )}
           </div>
         </div>
         <div className="hourly-table-container">
           {error && <div className="hourly-error">{error}</div>}
-          {!error &&
-            (data ? (
-              renderTable(filteredData)
-            ) : (
-              <div className="hourly-loading">Loading...</div>
-            ))}
+          {loading && <div className="hourly-loading">Loading...</div>}
+          {!error && !loading && renderTable(filteredData)}
         </div>
       </div>
 
-      {/* Second Card (Aggregated Data) */}
       <div className="aggregated-card">
         <div className="aggregated-card-header">
           <h2 className="aggregated-title">Aggregated Analytics by TKID</h2>
